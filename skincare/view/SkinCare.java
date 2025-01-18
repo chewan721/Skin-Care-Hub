@@ -1,8 +1,13 @@
 package com.skincare.view;
 
+import com.skincare.controller.algorithm.Sorting;
+import com.skincare.controller.algorithm.Operations;
+import com.skincare.controller.algorithm.Search;
+import com.skincare.controller.datastructure.ArrayList;
 import com.skincare.model.ProductModel;
-import java.util.LinkedList;
+import com.skincare.util.Validation;
 import java.util.List;
+import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 
 
@@ -11,20 +16,26 @@ import javax.swing.table.DefaultTableModel;
  * @author DeLL
  */
 public class SkinCare extends javax.swing.JFrame {
-    private List<ProductModel> productList;    
+    private ArrayList productData;   
+    private Operations operations;
     private java.awt.CardLayout cardLayout;
-
+    private Sorting sorting;
+    private Search search;
 
     /**
      * Creates new form SkinCare
      */
     public SkinCare() {
+        productData = new ArrayList();
+        operations = new Operations();
+        sorting = new Sorting();
+        search = new Search();
         initComponents();
         initializeLayout(); // Set up CardLayout and add screens
         startProgress(); // Show loading screen and initiate progress  
         initializeData();
         initializeComboBox();
-        
+        clearInputFields();
         
     }
 
@@ -70,22 +81,24 @@ public class SkinCare extends javax.swing.JFrame {
         productScrollPane = new javax.swing.JScrollPane();
         productTable = new javax.swing.JTable();
         AddProduct = new javax.swing.JButton();
-        viewProductButton = new javax.swing.JButton();
+        clearProductButton = new javax.swing.JButton();
         UpdateButton = new javax.swing.JButton();
         RemoveProduct = new javax.swing.JButton();
+        sortByPriceBtn = new javax.swing.JButton();
+        sortByIdBtn = new javax.swing.JButton();
+        sortByNameBtn = new javax.swing.JButton();
         adminHeaderPanel = new javax.swing.JPanel();
-        searchBtn = new javax.swing.JButton();
         searchBarTxtField = new javax.swing.JTextField();
         logoLbl = new javax.swing.JLabel();
         adminLabel = new javax.swing.JLabel();
         btnLogout = new javax.swing.JButton();
+        searchBtn = new javax.swing.JButton();
         homePanel = new javax.swing.JPanel();
         homeBodyPanel = new javax.swing.JPanel();
         screenPanel = new javax.swing.JPanel();
         homeLabel = new javax.swing.JLabel();
         homeScrollPane = new javax.swing.JScrollPane();
         homeTextArea = new javax.swing.JTextArea();
-        shopButton = new javax.swing.JButton();
         headerPanel = new javax.swing.JPanel();
         searchButton = new javax.swing.JButton();
         nameLabel = new javax.swing.JLabel();
@@ -400,11 +413,11 @@ public class SkinCare extends javax.swing.JFrame {
             }
         });
 
-        viewProductButton.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
-        viewProductButton.setText("View Product");
-        viewProductButton.addActionListener(new java.awt.event.ActionListener() {
+        clearProductButton.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
+        clearProductButton.setText("Clear Field");
+        clearProductButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                viewProductButtonActionPerformed(evt);
+                clearProductButtonActionPerformed(evt);
             }
         });
 
@@ -424,51 +437,90 @@ public class SkinCare extends javax.swing.JFrame {
             }
         });
 
+        sortByPriceBtn.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        sortByPriceBtn.setText("Sort by price ");
+        sortByPriceBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                sortByPriceBtnActionPerformed(evt);
+            }
+        });
+
+        sortByIdBtn.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        sortByIdBtn.setText("Sort by Id ");
+        sortByIdBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                sortByIdBtnActionPerformed(evt);
+            }
+        });
+
+        sortByNameBtn.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        sortByNameBtn.setText("Sort by Name");
+        sortByNameBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                sortByNameBtnActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout adminBodyPanelLayout = new javax.swing.GroupLayout(adminBodyPanel);
         adminBodyPanel.setLayout(adminBodyPanelLayout);
         adminBodyPanelLayout.setHorizontalGroup(
             adminBodyPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(adminBodyPanelLayout.createSequentialGroup()
                 .addGroup(adminBodyPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(productScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 554, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(productDataLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 151, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(adminBodyPanelLayout.createSequentialGroup()
-                        .addContainerGap()
                         .addGroup(adminBodyPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(AddProduct, javax.swing.GroupLayout.PREFERRED_SIZE, 220, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(UpdateButton, javax.swing.GroupLayout.PREFERRED_SIZE, 220, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(50, 50, 50)
-                        .addGroup(adminBodyPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(viewProductButton, javax.swing.GroupLayout.PREFERRED_SIZE, 220, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(RemoveProduct))))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 9, Short.MAX_VALUE)
+                            .addGroup(adminBodyPanelLayout.createSequentialGroup()
+                                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addGroup(adminBodyPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(RemoveProduct, javax.swing.GroupLayout.Alignment.TRAILING)
+                                    .addComponent(UpdateButton, javax.swing.GroupLayout.Alignment.TRAILING)
+                                    .addComponent(AddProduct, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 208, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(clearProductButton, javax.swing.GroupLayout.Alignment.TRAILING))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 193, Short.MAX_VALUE)
+                                .addGroup(adminBodyPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(sortByNameBtn)
+                                    .addGroup(adminBodyPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                        .addComponent(sortByIdBtn, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addComponent(sortByPriceBtn, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                            .addGroup(adminBodyPanelLayout.createSequentialGroup()
+                                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(productDataLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 151, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(0, 0, Short.MAX_VALUE)))
+                        .addGap(30, 30, 30))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, adminBodyPanelLayout.createSequentialGroup()
+                        .addGap(0, 15, Short.MAX_VALUE)
+                        .addComponent(productScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 554, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)))
                 .addComponent(productDetailsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(47, 47, 47))
+                .addGap(23, 23, 23))
         );
         adminBodyPanelLayout.setVerticalGroup(
             adminBodyPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(adminBodyPanelLayout.createSequentialGroup()
-                .addGroup(adminBodyPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(productDetailsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(adminBodyPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(adminBodyPanelLayout.createSequentialGroup()
                         .addComponent(productDataLabel)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(productScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 230, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(82, 82, 82)
-                        .addGroup(adminBodyPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGroup(adminBodyPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(sortByPriceBtn)
+                            .addComponent(UpdateButton))
+                        .addGap(28, 28, 28)
+                        .addGroup(adminBodyPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(AddProduct)
-                            .addComponent(viewProductButton))
-                        .addGap(18, 18, 18)
-                        .addGroup(adminBodyPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(UpdateButton)
-                            .addComponent(RemoveProduct))))
-                .addContainerGap(134, Short.MAX_VALUE))
+                            .addComponent(sortByIdBtn)))
+                    .addComponent(productDetailsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 28, Short.MAX_VALUE)
+                .addGroup(adminBodyPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(RemoveProduct)
+                    .addComponent(sortByNameBtn))
+                .addGap(30, 30, 30)
+                .addComponent(clearProductButton)
+                .addGap(52, 52, 52))
         );
 
         adminHeaderPanel.setBackground(new java.awt.Color(245, 250, 218));
-
-        searchBtn.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
-        searchBtn.setText("Search");
 
         searchBarTxtField.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
 
@@ -485,6 +537,14 @@ public class SkinCare extends javax.swing.JFrame {
             }
         });
 
+        searchBtn.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        searchBtn.setText("Search");
+        searchBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                searchBtnActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout adminHeaderPanelLayout = new javax.swing.GroupLayout(adminHeaderPanel);
         adminHeaderPanel.setLayout(adminHeaderPanelLayout);
         adminHeaderPanelLayout.setHorizontalGroup(
@@ -493,13 +553,13 @@ public class SkinCare extends javax.swing.JFrame {
                 .addComponent(logoLbl, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(adminLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGap(96, 96, 96)
-                .addComponent(searchBarTxtField, javax.swing.GroupLayout.PREFERRED_SIZE, 281, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(29, 29, 29)
-                .addComponent(searchBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
+                .addComponent(searchBarTxtField, javax.swing.GroupLayout.PREFERRED_SIZE, 212, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(36, 36, 36)
+                .addComponent(searchBtn)
+                .addGap(194, 194, 194)
                 .addComponent(btnLogout)
-                .addGap(98, 98, 98))
+                .addGap(51, 51, 51))
         );
         adminHeaderPanelLayout.setVerticalGroup(
             adminHeaderPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -508,14 +568,14 @@ public class SkinCare extends javax.swing.JFrame {
                 .addGroup(adminHeaderPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(adminHeaderPanelLayout.createSequentialGroup()
                         .addGap(0, 16, Short.MAX_VALUE)
-                        .addGroup(adminHeaderPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(adminLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGroup(adminHeaderPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(adminHeaderPanelLayout.createSequentialGroup()
                                 .addGap(1, 1, 1)
                                 .addGroup(adminHeaderPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                                     .addComponent(searchBarTxtField, javax.swing.GroupLayout.PREFERRED_SIZE, 47, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(searchBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 49, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(btnLogout, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE)))))
+                                    .addComponent(btnLogout, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(searchBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 49, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addComponent(adminLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE)))
                     .addComponent(logoLbl, javax.swing.GroupLayout.DEFAULT_SIZE, 70, Short.MAX_VALUE))
                 .addContainerGap())
         );
@@ -524,12 +584,10 @@ public class SkinCare extends javax.swing.JFrame {
         adminPanel.setLayout(adminPanelLayout);
         adminPanelLayout.setHorizontalGroup(
             adminPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, adminPanelLayout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(adminHeaderPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
             .addGroup(adminPanelLayout.createSequentialGroup()
-                .addComponent(adminBodyPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(adminPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(adminHeaderPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(adminBodyPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(0, 0, Short.MAX_VALUE))
         );
         adminPanelLayout.setVerticalGroup(
@@ -561,20 +619,12 @@ public class SkinCare extends javax.swing.JFrame {
         homeTextArea.setBorder(null);
         homeScrollPane.setViewportView(homeTextArea);
 
-        shopButton.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
-        shopButton.setText("Shop Now");
-
         javax.swing.GroupLayout screenPanelLayout = new javax.swing.GroupLayout(screenPanel);
         screenPanel.setLayout(screenPanelLayout);
         screenPanelLayout.setHorizontalGroup(
             screenPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(screenPanelLayout.createSequentialGroup()
-                .addGroup(screenPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(homeScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                    .addGroup(screenPanelLayout.createSequentialGroup()
-                        .addGap(117, 117, 117)
-                        .addComponent(shopButton)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 79, Short.MAX_VALUE)))
+                .addComponent(homeScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 329, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(homeLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 654, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
@@ -584,10 +634,7 @@ public class SkinCare extends javax.swing.JFrame {
             .addGroup(screenPanelLayout.createSequentialGroup()
                 .addGroup(screenPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(homeLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 545, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGroup(screenPanelLayout.createSequentialGroup()
-                        .addComponent(homeScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 389, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(34, 34, 34)
-                        .addComponent(shopButton, javax.swing.GroupLayout.PREFERRED_SIZE, 49, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addComponent(homeScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 389, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(0, 64, Short.MAX_VALUE))
         );
 
@@ -595,7 +642,9 @@ public class SkinCare extends javax.swing.JFrame {
         homeBodyPanel.setLayout(homeBodyPanelLayout);
         homeBodyPanelLayout.setHorizontalGroup(
             homeBodyPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(screenPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addGroup(homeBodyPanelLayout.createSequentialGroup()
+                .addComponent(screenPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 14, Short.MAX_VALUE))
         );
         homeBodyPanelLayout.setVerticalGroup(
             homeBodyPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -903,33 +952,26 @@ public class SkinCare extends javax.swing.JFrame {
         getContentPane().add(loadingPanel, "LoadingScreen");
         getContentPane().add(loginPanel, "LoginScreen");
         getContentPane().add(mainPanel, "MainScreen");
-
+        
         // Start with the loading screen
         loadScreen("LoadingScreen");
       
     }
     
     private void initializeData(){
-         productList = new LinkedList <> ();  
         //adding sample product to the table
         addProduct(new ProductModel(10050, "Moisoftt",385.00 ,"Aurel Derma",(short)100,"Cleanser"));
         addProduct(new ProductModel(51848, "Peach 77",2900.00 ,"Anua",(short)250 ,"Toner"));
         addProduct(new ProductModel(64812, "SuperSerum",1685.00 ,"BIOBALANCE",(short)30 ,"Face Serum"));
         addProduct(new ProductModel(98742, "Lipidz",789.50 ,"Ethicare",(short)100 ,"Pigmentation"));
         addProduct(new ProductModel(97552, "Luxurious",900.0 ,"truederma",(short)60 ,"SunScreen"));
+        updateProductTable(productData.getAllProducts());
     }
     
+
     private void addProduct(ProductModel product){
-        productList.add(product);
-        DefaultTableModel model = (DefaultTableModel) productTable.getModel();
-        model.addRow(new Object[]{
-           product.getProductID(),
-           product.getProductName(),
-           product.getPrice(),
-           product.getBrand(),
-           product.getWeight(),
-           product.getCategory()
-        });
+        productData.addProduct(product);
+        operations.addProduct(productTable, product);
     }
     
         private void initializeComboBox() {
@@ -940,6 +982,7 @@ public class SkinCare extends javax.swing.JFrame {
         // Brands
         String[] brands = {"Anua", "Aurel Derma", "BIOBALANCE", "Ethicare", "truederma"};
         brandComboBox = new javax.swing.JComboBox<>(brands);
+       
     }
     
     /**
@@ -990,19 +1033,75 @@ public class SkinCare extends javax.swing.JFrame {
     }//GEN-LAST:event_btnLoginActionPerformed
 
     private void AddProductActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_AddProductActionPerformed
+        String productId = productIdTextField.getText();
+        String productName = productNameTextField.getText();
+        String productPrice = priceTextField.getText();
+        String productWeight = weightTextField.getText();
+        String productBrand = (String) brandComboBox.getSelectedItem();
+        String productCategory = (String) categoryComboBox.getSelectedItem();
 
+        if (Validation.validateProductInput(productId, productName, productPrice, productWeight, productBrand, productCategory)) {
+            int productID = Integer.parseInt(productId);
+
+            // Check for duplicate product ID
+            if (productData.isProductIdExists(productID)) {
+                JOptionPane.showMessageDialog(this, "Product ID already exists. Please use a different ID.", "Duplicate Product ID", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            double price = Double.parseDouble(productPrice);
+            short weight = Short.parseShort(productWeight);
+
+            ProductModel newProduct = new ProductModel(productID, productName, price, productBrand, weight, productCategory);
+            addProduct(newProduct);
+
+            // Clear input fields
+            clearInputFields();
+            // Show success message
+            JOptionPane.showMessageDialog(this, "Product added successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+        }
     }//GEN-LAST:event_AddProductActionPerformed
 
     private void UpdateButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_UpdateButtonActionPerformed
- 
+        int selectedRow = productTable.getSelectedRow();
+        if (selectedRow >= 0) {
+            String productId = productIdTextField.getText();
+            String productName = productNameTextField.getText();
+            String productPrice = priceTextField.getText();
+            String productWeight = weightTextField.getText();
+            String productBrand = (String) brandComboBox.getSelectedItem();
+            String productCategory = (String) categoryComboBox.getSelectedItem();
+
+            if (Validation.validateProductInput(productId, productName, productPrice, productWeight, productBrand, productCategory)) {
+                int productID = Integer.parseInt(productId);
+                double price = Double.parseDouble(productPrice);
+                short weight = Short.parseShort(productWeight);
+
+                ProductModel updatedProduct = new ProductModel(productID, productName, price, productBrand, weight, productCategory);
+                productData.updateProduct(selectedRow, updatedProduct);
+                operations.updateProduct(productTable, selectedRow, updatedProduct);
+
+                // Clear input fields
+                clearInputFields();
+
+                // Show success message
+                JOptionPane.showMessageDialog(this, "Product updated successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "Please select a product to update.", "Update Error", JOptionPane.WARNING_MESSAGE);
+        }
     }//GEN-LAST:event_UpdateButtonActionPerformed
 
-    private void viewProductButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_viewProductButtonActionPerformed
-    
-    }//GEN-LAST:event_viewProductButtonActionPerformed
-
     private void RemoveProductActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_RemoveProductActionPerformed
-       
+        int selectedRow = productTable.getSelectedRow();
+        if (selectedRow >= 0) {
+            productData.removeProduct(selectedRow);
+            operations.deleteProduct(productTable, selectedRow);
+            // Show success message
+            JOptionPane.showMessageDialog(this, "Product removed successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+        } else {
+            JOptionPane.showMessageDialog(this, "Please select a product to remove.", "Remove Error", JOptionPane.WARNING_MESSAGE);
+        }
 
     }//GEN-LAST:event_RemoveProductActionPerformed
 
@@ -1012,6 +1111,89 @@ public class SkinCare extends javax.swing.JFrame {
         loadScreen("LoginScreen"); // Load the main screen
     }//GEN-LAST:event_btnLogoutActionPerformed
 
+    private void sortByPriceBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_sortByPriceBtnActionPerformed
+        List<ProductModel> sortedList = sorting.sortByPrice(productData.getAllProducts(), false);
+        updateProductTable(sortedList);
+    }//GEN-LAST:event_sortByPriceBtnActionPerformed
+
+    private void searchBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_searchBtnActionPerformed
+        String searchTerm = searchBarTextField.getText().trim();
+        List<ProductModel> productList = productData.getAllProducts();
+        Search search = new Search();
+        ProductModel foundProduct = null;
+
+        // Search by name
+        foundProduct = search.searchByName(searchTerm, productList, 0, productList.size() - 1);
+
+        // Check the result
+        if (foundProduct != null) {
+            // Update the input fields with the product details
+            productIdTextField.setText(String.valueOf(foundProduct.getProductID()));
+            productNameTextField.setText(foundProduct.getProductName());
+            priceTextField.setText(String.valueOf(foundProduct.getPrice()));
+            weightTextField.setText(String.valueOf(foundProduct.getWeight()));
+            brandComboBox.setSelectedItem(foundProduct.getBrand());
+            categoryComboBox.setSelectedItem(foundProduct.getCategory());
+
+            // Update the table to show only the found product
+            DefaultTableModel model = (DefaultTableModel) productTable.getModel();
+            model.setRowCount(0); // Clear the table
+            model.addRow(new Object[]{
+                foundProduct.getProductID(),
+                foundProduct.getProductName(),
+                foundProduct.getPrice(),
+                foundProduct.getWeight(),
+                foundProduct.getBrand(),
+                foundProduct.getCategory()
+            });
+        } else {
+            JOptionPane.showMessageDialog(this, "No products found for the search term: " + searchTerm, "No Results", JOptionPane.INFORMATION_MESSAGE);
+        }
+    }//GEN-LAST:event_searchBtnActionPerformed
+
+    private void sortByIdBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_sortByIdBtnActionPerformed
+        List<ProductModel> sortedList = sorting.sortByProductId(productData.getAllProducts(), false);
+        updateProductTable(sortedList);
+    }//GEN-LAST:event_sortByIdBtnActionPerformed
+
+    private void sortByNameBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_sortByNameBtnActionPerformed
+                List<ProductModel> sortedList = sorting.sortByProductName(productData.getAllProducts(), false);
+        updateProductTable(sortedList);
+    }//GEN-LAST:event_sortByNameBtnActionPerformed
+
+    private void clearProductButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clearProductButtonActionPerformed
+        productIdTextField.setText("");
+        productNameTextField.setText("");
+        priceTextField.setText("");
+        weightTextField.setText("");
+    }//GEN-LAST:event_clearProductButtonActionPerformed
+
+
+    private void updateProductTable(List<ProductModel> productList) {
+        DefaultTableModel model = (DefaultTableModel) productTable.getModel();
+        model.setRowCount(0); // Clear existing rows
+
+        for (ProductModel product : productList) {
+            model.addRow(new Object[]{
+                product.getProductID(),
+                product.getProductName(),
+                product.getPrice(),
+                product.getBrand(),
+                product.getWeight(),
+                product.getCategory()
+            });
+        }
+    }
+    
+    private void clearInputFields(){
+    // Clear input fields
+        productIdTextField.setText("");
+        productNameTextField.setText("");
+        priceTextField.setText("");
+        weightTextField.setText("");
+    }
+    
+    
     
      /**
      * Switches the application screen to the specified screen name.
@@ -1075,6 +1257,7 @@ public class SkinCare extends javax.swing.JFrame {
     private javax.swing.JLabel categoryLabel;
     private javax.swing.JLabel cleanserLabel;
     private javax.swing.JLabel cleanserNameLabel;
+    private javax.swing.JButton clearProductButton;
     private javax.swing.JLabel faceMaskLabel;
     private javax.swing.JLabel faceMaskNameLabel;
     private javax.swing.JPanel headerPanel;
@@ -1122,13 +1305,14 @@ public class SkinCare extends javax.swing.JFrame {
     private javax.swing.JButton searchButton;
     private javax.swing.JLabel serumLabel;
     private javax.swing.JLabel serumNameLabel;
-    private javax.swing.JButton shopButton;
+    private javax.swing.JButton sortByIdBtn;
+    private javax.swing.JButton sortByNameBtn;
+    private javax.swing.JButton sortByPriceBtn;
     private javax.swing.JLabel sunScreenLabel;
     private javax.swing.JLabel sunScreenNameLabel;
     private javax.swing.JLabel tonerLabel;
     private javax.swing.JLabel tonerNameLabel;
     private javax.swing.JTextField txtFldLoginUsername;
-    private javax.swing.JButton viewProductButton;
     private javax.swing.JLabel weightLabel;
     private javax.swing.JTextField weightTextField;
     // End of variables declaration//GEN-END:variables
