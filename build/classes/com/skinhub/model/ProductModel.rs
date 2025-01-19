@@ -1,0 +1,1 @@
+com.skincare.model.ProductModel
